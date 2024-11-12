@@ -1,9 +1,9 @@
-import os
 import sys
 import json
 import tempfile
 
 import qrcode
+import os
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QFormLayout, QLabel, QLineEdit,
                              QPushButton, QComboBox, QScrollArea, QFrame, QDateEdit, QFileDialog, QMessageBox)
 from PyQt5.QtGui import QPixmap
@@ -100,13 +100,13 @@ class DogInfoApp(QWidget):
         add_owner_button.clicked.connect(self.add_owner_fields)
         self.layout.addWidget(add_owner_button)
 
-        # Button to generate QR code
-        generate_qr_button = QPushButton("Generate QR Code")
-        generate_qr_button.clicked.connect(self.generate_qr_code)
-        self.layout.addWidget(generate_qr_button)
+        # Button to generate and save QR code as Image
+        save_image_button = QPushButton("Generate and Save QR Code as Image")
+        save_image_button.clicked.connect(self.save_as_image)
+        self.layout.addWidget(save_image_button)
 
         # Button to generate and save QR code as PDF
-        save_pdf_button = QPushButton("Generate and Save as PDF")
+        save_pdf_button = QPushButton("Save as PDF")
         save_pdf_button.clicked.connect(self.save_as_pdf)
         self.layout.addWidget(save_pdf_button)
 
@@ -181,15 +181,29 @@ class DogInfoApp(QWidget):
         # Save QR code image data for later use
         self.qr_image_data = buffer.getvalue()
 
-    import tempfile
+    def save_as_image(self):
+        # Generate and save QR code as image
+        self.generate_qr_code()
 
-    import tempfile
+        # Ask user for save location
+        options = QFileDialog.Options()
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save Image", "", "PNG Files (*.png)", options=options)
 
-    import tempfile
-    from PyQt5.QtWidgets import QMessageBox
+        if file_path:
+            try:
+                # Save the QR code image to the specified location
+                with open(file_path, "wb") as image_file:
+                    image_file.write(self.qr_image_data)
+
+                # Show success message
+                QMessageBox.information(self, "Success", "The image has been saved successfully.")
+
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                QMessageBox.critical(self, "Error", f"An error occurred while saving the image: {e}")
 
     def save_as_pdf(self):
-        # Ensure QR code is generated
+        # Generate QR code first
         self.generate_qr_code()
 
         # Ask user for save location
