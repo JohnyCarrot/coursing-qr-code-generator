@@ -1,0 +1,1 @@
+# coursing-qr-code-generator
