@@ -5,9 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dog Information</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/country-select-js@2.0.1/build/css/countrySelect.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/country-select-js@2.0.1/build/js/countrySelect.min.js"></script>
+
   <style>
     .qr-preview { max-width: 200px; margin: auto; display: block; }
   </style>
@@ -89,11 +93,44 @@ function addOwner() {
     <div class="mb-2"><input class="form-control" placeholder="Last Name" data-owner="LastName"></div>
     <div class="mb-2"><input class="form-control" placeholder="Street and Number" data-owner="StreetAndNumber"></div>
     <div class="mb-2"><input class="form-control" placeholder="Postal Code and City" data-owner="PostalCodeAndCity"></div>
-    <div class="mb-2"><input class="form-control" placeholder="Country" data-owner="Country"></div>
+    <div class="mb-2"><input class="form-control country-selector" placeholder="Country" data-owner="Country"></div>
     <button class="btn btn-sm btn-outline-danger" onclick="removeOwner(this)">Remove</button>
   `;
   container.appendChild(div);
   updateOwnerLabels();
+$(".country-selector").countrySelect({
+  defaultCountry: "sk",
+  onlyCountries: [
+    "at", // Austria
+    "be", // Belgium
+    "bg", // Bulgaria
+    "hr", // Croatia
+    "cy", // Cyprus
+    "cz", // Czech Republic
+    "dk", // Denmark
+    "ee", // Estonia
+    "fi", // Finland
+    "fr", // France
+    "de", // Germany
+    "gr", // Greece
+    "hu", // Hungary
+    "ie", // Ireland
+    "it", // Italy
+    "lv", // Latvia
+    "lt", // Lithuania
+    "lu", // Luxembourg
+    "mt", // Malta
+    "nl", // Netherlands
+    "pl", // Poland
+    "pt", // Portugal
+    "ro", // Romania
+    "sk", // Slovakia
+    "si", // Slovenia
+    "es", // Spain
+    "se"  // Sweden
+  ]
+});
+
 }
 
 function removeOwner(button) {
