@@ -4,7 +4,7 @@
 ```
 {
     "Dog": {
-        "DogName": "Max Maximus",
+        "Name": "Max Maximus",
         "Breed": "Whippet",
         "Class": "FCI-CSS class",
         "Gender": "Female",

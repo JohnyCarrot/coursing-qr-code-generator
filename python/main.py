@@ -249,7 +249,7 @@ class DogInfoApp(QWidget):
         # Collect and return dog data as dictionary with DogName first
         dog_data = {
             "Dog": {
-                "DogName": self.dog_name_input.text(),
+                "Name": self.dog_name_input.text(),
                 "Breed": self.breed_input.text() if self.breed_combo.currentText() == "Other" else self.breed_combo.currentText(),
                 "Class": self.class_input.text() if self.class_combo.currentText() == "Other" else self.class_combo.currentText(),
                 "Gender": self.gender_combo.currentText(),
