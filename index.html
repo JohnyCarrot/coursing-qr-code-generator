@@ -145,14 +145,70 @@ function getDogData() {
 function generateQRCode() {
   const data = getDogData();
   const json = JSON.stringify(data);
-  QRCode.toDataURL(json, {
-    errorCorrectionLevel: 'H',
-  }, function (err, url) {
+  const dogName = data.Dog.Name || "";
+
+  QRCode.toCanvas(document.createElement("canvas"), json, {
+    errorCorrectionLevel: 'H'
+  }, function (err, qrCanvas) {
     if (err) return alert("QR generation failed");
+
+    const qrWidth = qrCanvas.width;
+    const qrHeight = qrCanvas.height;
+
+    const ctxTest = document.createElement("canvas").getContext("2d");
+    const fontSize = 30;
+    ctxTest.font = `bold ${fontSize}px sans-serif`;
+
+    // rozdelenie dlhého mena na viaceré riadky
+    function wrapText(text, maxWidth) {
+      const words = text.split(' ');
+      let lines = [];
+      let currentLine = words[0];
+
+      for (let i = 1; i < words.length; i++) {
+        const word = words[i];
+        const testLine = currentLine + ' ' + word;
+        const width = ctxTest.measureText(testLine).width;
+        if (width < maxWidth) {
+          currentLine = testLine;
+        } else {
+          lines.push(currentLine);
+          currentLine = word;
+        }
+      }
+      lines.push(currentLine);
+      return lines;
+    }
+
+    const lines = wrapText(dogName, qrWidth - 20);
+    const lineHeight = fontSize + 6;
+    const extraHeight = lineHeight * lines.length;
+
+    const fullCanvas = document.createElement("canvas");
+    fullCanvas.width = qrWidth;
+    fullCanvas.height = qrHeight + extraHeight;
+    const ctx = fullCanvas.getContext("2d");
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, fullCanvas.width, fullCanvas.height);
+
+    ctx.drawImage(qrCanvas, 0, 0);
+
+    ctx.fillStyle = "#000000";
+    ctx.textAlign = "center";
+    ctx.font = `bold ${fontSize}px sans-serif`;
+
+    lines.forEach((line, index) => {
+      ctx.fillText(line, qrWidth / 2, qrHeight + (index + 1) * lineHeight);
+    });
+
+    const url = fullCanvas.toDataURL("image/png");
     document.getElementById("qrPreview").src = url;
     document.getElementById("qrPreview").dataset.qr = url;
   });
 }
+
+
 
 function downloadQR() {
   const src = document.getElementById("qrPreview").dataset.qr;
