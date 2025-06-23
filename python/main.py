@@ -18,12 +18,12 @@ from PyQt5.QtCore import Qt, QDate
 
 
 class DogInfoApp(QWidget):
-    """Dog information collection app with dynamic owner add/remove."""
+    """Dog information collection app with dynamic owner add/remove and a full reset."""
 
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Dog Information")
-        self.resize(400, 600)                       # len „štartovacia“ veľkosť, nie pevná
+        self.resize(400, 600)                       # len štartovacia veľkosť (nie pevná)
 
         # ───────────────────────── main layout ─────────────────────────
         self.layout = QVBoxLayout(self)
@@ -112,6 +112,11 @@ class DogInfoApp(QWidget):
         save_pdf_button = QPushButton("Save as PDF")
         save_pdf_button.clicked.connect(self.save_as_pdf)
         self.layout.addWidget(save_pdf_button)
+
+        # reset button  ← NOVÉ
+        reset_button = QPushButton("Reset / Clear All")
+        reset_button.clicked.connect(self.reset_form)
+        self.layout.addWidget(reset_button)
 
         # QR label
         self.qr_label = QLabel(alignment=Qt.AlignCenter)
@@ -242,6 +247,38 @@ class DogInfoApp(QWidget):
                 os.remove(tmp_path)
             except Exception:
                 pass
+
+    # ──────────────────────── reset / clear ──────────────────────────
+    def reset_form(self):
+        """Vymaže všetky polia, ponechá iba prázdneho Owner 1 a odstráni QR kód."""
+        # Dog fields
+        self.dog_name_input.clear()
+        self.breed_combo.setCurrentIndex(0)
+        self.breed_input.clear()
+        self.breed_input.setVisible(False)
+
+        self.class_combo.setCurrentIndex(0)
+        self.class_input.clear()
+        self.class_input.setVisible(False)
+
+        self.gender_combo.setCurrentIndex(0)
+        self.chip_number_input.clear()
+        self.license_number_input.clear()
+        self.pedigree_number_input.clear()
+        self.birth_date_input.setDate(QDate.currentDate())
+
+        # Owners: odstrániť všetkých okrem prvého
+        while len(self.owner_frames) > 1:
+            self.remove_owner(self.owner_frames[-1])
+
+        # vyčistiť polia Owner 1
+        first_owner = self.owners[0]
+        for field in first_owner.values():
+            field.clear()
+
+        # skryť / vyčistiť QR
+        self.qr_label.clear()
+        self.qr_image_data = b""
 
     # ─────────────────────── data collection ─────────────────────────
     def collect_data(self):
