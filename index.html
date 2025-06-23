@@ -167,14 +167,18 @@ function getDogData() {
     BirthDate: document.getElementById("birthDate").value,
     Owners: Array.from(document.querySelectorAll("#owners > div")).map(owner => {
       const get = attr => owner.querySelector(`[data-owner="${attr}"]`).value;
+      const countryInput = $(owner).find('[data-owner="Country"]');
+      const countryCode = countryInput.countrySelect("getSelectedCountryData")?.iso2?.toUpperCase() || "";
+
       return {
         FirstName: get("FirstName"),
         LastName: get("LastName"),
         StreetAndNumber: get("StreetAndNumber"),
         PostalCodeAndCity: get("PostalCodeAndCity"),
-        Country: get("Country")
+        Country: countryCode
       };
     })
+
   };
   return { Dog: dog };
 }
