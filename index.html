@@ -82,6 +82,17 @@
 
 <script>
 let ownerCounter = 0;
+function enableAutoQRUpdate() {
+  // všetky vstupy, selecty a dátumy v hlavnom formulári
+  document.querySelectorAll("#dogForm input, #dogForm select").forEach(el => {
+    el.addEventListener("input", generateQRCode);
+    el.addEventListener("change", generateQRCode);
+  });
+  document.querySelectorAll(".country-selector").forEach(el => {
+  $(el).off("change").on("change", generateQRCode);
+});
+
+}
 
 function addOwner() {
   const container = document.getElementById("owners");
@@ -130,6 +141,7 @@ $(".country-selector").countrySelect({
     "se"  // Sweden
   ]
 });
+enableAutoQRUpdate();
 
 }
 
@@ -149,10 +161,10 @@ function updateOwnerLabels() {
 }
 
 function resetForm() {
-  document.getElementById("qrPreview").src = "";
-  document.getElementById("qrPreview").dataset.qr = "";
   document.getElementById("owners").innerHTML = "";
   addOwner();
+  document.getElementById("qrPreview").src = "";
+  document.getElementById("qrPreview").dataset.qr = "";
 }
 
 function getDogData() {
