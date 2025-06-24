@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="sk">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Načítanie QR kódu psa</title>
+  <title>Dog QR Code Reader</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
   <style>
@@ -11,7 +11,7 @@
 </head>
 <body class="bg-light p-4">
   <div class="container">
-    <h1 class="mb-4">Nahranie QR kódu psa</h1>
+    <h1 class="mb-4">Upload Dog QR Code</h1>
 
     <div class="mb-3">
       <input type="file" accept="image/*" id="qr-input-file" class="form-control">
@@ -52,30 +52,44 @@
     function renderDogInfo(data) {
       const dog = data.Dog;
       let html = `
-        <h3>Informácie o psovi</h3>
+        <h3>Dog Information</h3>
         <table class="table table-bordered">
           <tbody>
-            <tr><th>Meno</th><td>${dog.Name}</td></tr>
-            <tr><th>Plemeno</th><td>${dog.Breed}</td></tr>
-            <tr><th>Trieda</th><td>${dog.Class}</td></tr>
-            <tr><th>Pohlavie</th><td>${dog.Gender}</td></tr>
-            <tr><th>Čip</th><td>${dog.ChipNumber}</td></tr>
-            <tr><th>Licencia</th><td>${dog.LicenseNumber}</td></tr>
-            <tr><th>Rodokmeň</th><td>${dog.PedigreeNumber}</td></tr>
-            <tr><th>Dátum narodenia</th><td>${dog.BirthDate}</td></tr>
-            <tr><th>Majitelia</th><td><ul class="mb-0">` +
-              dog.Owners.map(o => `<li>${o.FirstName} ${o.LastName}, ${o.StreetAndNumber}, ${o.PostalCodeAndCity}, ${o.Country}</li>`).join("") +
-            `</ul></td></tr>
+            <tr><th>Name</th><td>${dog.Name}</td></tr>
+            <tr><th>Breed</th><td>${dog.Breed}</td></tr>
+            <tr><th>Class</th><td>${dog.Class}</td></tr>
+            <tr><th>Gender</th><td>${dog.Gender}</td></tr>
+            <tr><th>Chip Number</th><td>${dog.ChipNumber}</td></tr>
+            <tr><th>License Number</th><td>${dog.LicenseNumber}</td></tr>
+            <tr><th>Pedigree Number</th><td>${dog.PedigreeNumber}</td></tr>
+            <tr><th>Date of Birth</th><td>${dog.BirthDate}</td></tr>
           </tbody>
         </table>
+
+        <h4>Owners</h4>
       `;
+
+      dog.Owners.forEach((owner, index) => {
+        html += `
+          <div class="card mb-3">
+            <div class="card-header">Owner ${index + 1}</div>
+            <div class="card-body">
+              <p><strong>Name:</strong> ${owner.FirstName} ${owner.LastName}</p>
+              <p><strong>Street and Number:</strong> ${owner.StreetAndNumber}</p>
+              <p><strong>Postal Code and City:</strong> ${owner.PostalCodeAndCity}</p>
+              <p><strong>Country:</strong> ${owner.Country}</p>
+            </div>
+          </div>
+        `;
+      });
+
       document.getElementById("dog-info").innerHTML = html;
     }
 
     document.getElementById("qr-input-file").addEventListener("change", function () {
       const file = this.files[0];
       if (!file) {
-        showResult("Prosím, nahraj obrázok s QR kódom.", false);
+        showResult("Please upload a QR code image.", false);
         return;
       }
 
@@ -96,16 +110,16 @@
             try {
               const parsed = JSON.parse(code.data);
               if (isValidDogData(parsed)) {
-                showResult("QR kód úspešne načítaný a validovaný.");
+                showResult("QR code successfully read and validated.");
                 renderDogInfo(parsed);
               } else {
-                showResult("QR kód má neúplnú alebo chybnú štruktúru.", false);
+                showResult("QR code structure is invalid or incomplete.", false);
               }
             } catch (e) {
-              showResult("QR kód obsahuje neplatný JSON.", false);
+              showResult("QR code contains invalid JSON.", false);
             }
           } else {
-            showResult("Nepodarilo sa rozpoznať QR kód na obrázku.", false);
+            showResult("Unable to detect QR code in the image.", false);
           }
         };
         img.src = reader.result;
