@@ -1,45 +1,53 @@
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-export default function App() {
+export default function ScannerScreen() {
+    const router = useRouter();
     const [facing, setFacing] = useState<CameraType>('back');
     const [permission, requestPermission] = useCameraPermissions();
-
-    // state to prevent multiple alerts
     const [scanned, setScanned] = useState(false);
 
-    if (!permission) {
-        return <View />; // still loading permissions
-    }
-
+    if (!permission) return <View />;
     if (!permission.granted) {
         return (
             <View style={styles.container}>
-                <Text style={styles.message}>We need your permission to show the camera</Text>
-                <Button onPress={requestPermission} title="Grant permission" />
+                <Text style={styles.message}>We need camera permission</Text>
+                <Button title="Grant permission" onPress={requestPermission} />
             </View>
         );
     }
 
     function toggleCameraFacing() {
-        setFacing(current => (current === 'back' ? 'front' : 'back'));
+        setFacing((current) => (current === 'back' ? 'front' : 'back'));
     }
 
-    // this gets called when a QR is detected
-    function handleBarCodeScanned({ type, data }: { type: string; data: string }) {
+    function handleBarCodeScanned({ data }: { data: string }) {
         setScanned(true);
-        Alert.alert(
-            'QR Code Scanned',
-            data,
-            [
-                {
-                    text: 'OK',
-                    onPress: () => setScanned(false),  // reset so you can scan again
-                },
-            ],
-            { cancelable: false }
-        );
+
+        let parsed;
+        try {
+            parsed = JSON.parse(data);
+        } catch {
+            Alert.alert("Invalid QR Code", "QR code does not contain valid JSON.", [
+                { text: "OK", onPress: () => setScanned(false) },
+            ]);
+            return;
+        }
+
+        if (!isValidDogData(parsed)) {
+            Alert.alert("Invalid QR Data", "Required dog data is missing or incorrect.", [
+                { text: "OK", onPress: () => setScanned(false) },
+            ]);
+            return;
+        }
+
+        // Navigate to dog detail page with serialized dog data
+        router.push({
+            pathname: "/dog-detail",
+            params: { dogData: JSON.stringify(parsed.Dog) },
+        });
     }
 
     return (
@@ -47,9 +55,7 @@ export default function App() {
             <CameraView
                 style={styles.camera}
                 facing={facing}
-                // only scan for QR barcodes
                 barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-                // if already scanned, disable until user dismisses alert
                 onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
             >
                 <View style={styles.buttonContainer}>
@@ -60,6 +66,45 @@ export default function App() {
             </CameraView>
         </View>
     );
+}
+
+function isValidDogData(data: any): boolean {
+    if (!data || typeof data !== "object") return false;
+    const dog = data.Dog;
+    if (!dog) return false;
+
+    const requiredFields = [
+        "Name",
+        "Breed",
+        "Class",
+        "Gender",
+        "ChipNumber",
+        "LicenseNumber",
+        "PedigreeNumber",
+        "BirthDate",
+        "Owners",
+    ];
+
+    for (const field of requiredFields) {
+        if (!(field in dog)) return false;
+    }
+
+    if (!Array.isArray(dog.Owners)) return false;
+
+    for (const owner of dog.Owners) {
+        const ownerFields = [
+            "FirstName",
+            "LastName",
+            "StreetAndNumber",
+            "PostalCodeAndCity",
+            "Country",
+        ];
+        for (const f of ownerFields) {
+            if (!(f in owner)) return false;
+        }
+    }
+
+    return true;
 }
 
 const styles = StyleSheet.create({
