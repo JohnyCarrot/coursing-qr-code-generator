@@ -1,6 +1,6 @@
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useRouter, useFocusEffect, Stack } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Alert, Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ScannerScreen() {
@@ -8,6 +8,13 @@ export default function ScannerScreen() {
     const [facing, setFacing] = useState<CameraType>('back');
     const [permission, requestPermission] = useCameraPermissions();
     const [scanned, setScanned] = useState(false);
+
+    // Reset čítačky pri návrate na túto obrazovku
+    useFocusEffect(
+        useCallback(() => {
+            setScanned(false);
+        }, [])
+    );
 
     if (!permission) return <View />;
     if (!permission.granted) {
@@ -20,7 +27,7 @@ export default function ScannerScreen() {
     }
 
     function toggleCameraFacing() {
-        setFacing((current) => (current === 'back' ? 'front' : 'back'));
+        setFacing(current => (current === 'back' ? 'front' : 'back'));
     }
 
     function handleBarCodeScanned({ data }: { data: string }) {
@@ -43,7 +50,6 @@ export default function ScannerScreen() {
             return;
         }
 
-        // Navigate to dog detail page with serialized dog data
         router.push({
             pathname: "/dog-detail",
             params: { dogData: JSON.stringify(parsed.Dog) },
@@ -51,20 +57,23 @@ export default function ScannerScreen() {
     }
 
     return (
-        <View style={styles.container}>
-            <CameraView
-                style={styles.camera}
-                facing={facing}
-                barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-                onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-            >
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-                        <Text style={styles.text}>Flip Camera</Text>
-                    </TouchableOpacity>
-                </View>
-            </CameraView>
-        </View>
+        <>
+            <Stack.Screen options={{ headerShown: false, tabBarStyle: { display: 'none' } }} />
+            <View style={styles.container}>
+                <CameraView
+                    style={styles.camera}
+                    facing={facing}
+                    barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+                    onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+                >
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+                            <Text style={styles.text}>Flip Camera</Text>
+                        </TouchableOpacity>
+                    </View>
+                </CameraView>
+            </View>
+        </>
     );
 }
 
